@@ -1,4 +1,3 @@
-
 # coding: utf-8
 
 from __future__ import unicode_literals
@@ -24,6 +23,7 @@ from copy import deepcopy
 
 
 # Check the Periodic Boundary Conditions, Make Sure that All the Frac Coords are in the range of (0,1)
+
 def _wrap_frac_coords(frac_coords):
     t_frac = deepcopy(frac_coords)
     for i,coord in enumerate(t_frac):
@@ -34,6 +34,7 @@ def _wrap_frac_coords(frac_coords):
                 t_frac[i][j] -= 1
     return t_frac
 
+
 # Parse the structure to get the direction 
 # ***********
 # For convinience the structure of the cell must satisfy vacuum-layer-vacuum,layer-vacuum or vacuum-layer. Layer-vacuum-layer cannot be corrected analyzed and the progrom will NOT CHECK IT FOR YOU.
@@ -41,6 +42,7 @@ def _wrap_frac_coords(frac_coords):
 # We strongly recommend that the direction along the vacuum region be perpendicular to the surface
 # 
 # ***********
+
 
 def _parse_structure(struc, v_tolerance = 5, layer_tol = 0.5):
     
@@ -109,6 +111,8 @@ def _parse_structure(struc, v_tolerance = 5, layer_tol = 0.5):
 
 
 # Parse the sorted_structure and return the information of each layers(atoms type, coordinate)
+
+
 class SingleLayer(MSONable):
     
     """
@@ -188,7 +192,6 @@ class SingleLayer(MSONable):
         
 
 
-
 class Layers(MSONable):
     
     def __init__(self, struc, v_tol = 5, layer_tol = 0.5):
@@ -203,6 +206,10 @@ class Layers(MSONable):
     @property
     def layer_dict(self):
         return self._layers
+
+    @property
+    def vdir(self):
+        return self._vdir
     
     @property
     def layer_number(self):
@@ -210,18 +217,19 @@ class Layers(MSONable):
     
     def layer_sites(self, layer_index):
         site_collection = list()
+        struc = self.structure
         for site_index in self.layer_dict[layer_index]:
             site_collection.append(struc[site_index])
         return site_collection
-
+    
     @property
     def layer_frac_loc(self):
         loc = list()
         l = self.layer_number
         for i in range(l-1):
             loc.append(np.mean(SingleLayer(self.layer_sites(i), self._vdir).v_frac_coords))
-        return loc
-    
+        return tuple(loc)
+        
     def distance(self, i, j):
         ilayer = SingleLayer(self.layer_sites(i), self._vdir)
         jlayer = SingleLayer(self.layer_sites(j), self._vdir)
@@ -263,7 +271,5 @@ class Layers(MSONable):
         """
         for layer_index in layer_indexes:
             self._struc.remove_sites(self.layer_dict[layer_index])
+            
   
-                
-                
-
